@@ -1,8 +1,8 @@
 	segment .data
 
 switch:
-	dq	main.case0
-	dq	main.case1
+	dq	main.case0		; Local labels can be used in functions for example
+	dq	main.case1		; You may reuse a sublabel name within different labels
 	dq	main.case2
 
 i:
