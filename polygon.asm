@@ -10,7 +10,7 @@ mptr	dq		0x0
 	extern scanf, printf, malloc, free
 	default rel
 
-area:
+polygon:
 .n	equ		0
 .xs	equ		8
 .ys	equ		16
@@ -65,8 +65,8 @@ area:
 	; Move lower-order double to xmm3
 	movsd xmm3, xmm2
 
-	; Shift xmm2 to put higher-order value in lower-order position.
-	pshldq xmm2, 8
+	; Shift the upper-order double to lower-order position.
+	psrldq xmm2, 0x8	; Do so by 8 bytes.
 
 	; Add lower-order double to xmm3
 	addsd xmm3, xmm2
@@ -197,7 +197,7 @@ main:
 	mov rdi, [rsp+.n]		; Load the length
 	mov rsi, [rsp+.xs]		; Load the x coordinate array pointer.
 	mov rdx, [rsp+.ys]		; Load the y coordinate array pointer.
-	call area				; Call area.
+	call polygon			; Call polygon.
 
 	; Print the area, value is in xmm0.
 	lea rdi, [pfmt]
