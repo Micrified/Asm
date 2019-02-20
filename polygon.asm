@@ -1,3 +1,5 @@
+	section .rodata
+ftwo	dq		2.0	
 	section .data
 sfmt	db		"%ld", 0x0
 ifmt	db		"%lf%lf", 0x0
@@ -37,7 +39,7 @@ polygon:
 .start:
 	mov rax, [rsp+.n]
 	cmp rbx, rax
-	jge .end
+	jg .end					; Use jg not jge to go one farther.
 
 	; Compute the offset.
 	mov rcx, rbx
@@ -71,6 +73,10 @@ polygon:
 	; Add lower-order double to xmm3
 	addsd xmm3, xmm2
 
+	; Zero the sign bit in xmm3
+	psllq xmm3, 0x1
+	psrlq xmm3, 0x1
+
 	; Add xmm3 to cumulative sum in xmm0
 	addsd xmm0, xmm3
 
@@ -78,6 +84,13 @@ polygon:
 	jmp .start
 
 .end:
+
+	; Put the value 2.0 into xmm2.
+	movsd xmm2, [ftwo]
+
+	; Divide the value in xmm0 by two.
+	divsd xmm0, xmm2
+
 	xor rax, rax
 	leave
 	ret
@@ -115,6 +128,10 @@ fill:
 	add rdx, rcx
 	call scanf
 
+	; If the scan failed, abort.
+	cmp rax, 0x2
+	jnz .abort
+
 	inc rbx
 	jmp .start
 .end:
@@ -136,7 +153,8 @@ fill:
 	mov rdi, [rsp+.ys]					; Get pointer again.
 	add rdi, rcx						; Add offset to pointer.
 	mov [rdi], rsi						; Save value at pointer.
-	
+
+.abort:
 	xor rax, rax
 	leave
 	ret
